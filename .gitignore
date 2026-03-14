@@ -1,0 +1,17 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.vsidx
+
+# .NET
+bin/
+obj/
+*.exe
+*.dll
+
+# Node modules (para React después)
+node_modules/
+
+# Variables de entorno
+.env

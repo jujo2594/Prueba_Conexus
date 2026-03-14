@@ -1,0 +1,6 @@
+@Conexus.Api_HostAddress = http://localhost:5008
+
+GET {{Conexus.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
