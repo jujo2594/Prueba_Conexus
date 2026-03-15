@@ -1,119 +1,193 @@
 import { useState, useEffect } from 'react'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { getDashboard } from '../../services/facturaService'
+import '../../App.css'
 
-const COLORS = ['#00d4ff', '#ffa500', '#00c853', '#ff4444', '#9c27b0', '#ff9800']
+const COLORS = ['#00d4ff', '#10b981', '#f59e0b', '#ef4444', '#a855f7', '#f97316']
+
+/* Tooltip personalizado */
+
+const CustomTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null
+  const { name, value } = payload[0]
+  return (
+    <div style={{
+      background: '#111827',
+      border: '1px solid #1e2d40',
+      borderRadius: 8,
+      padding: '0.75rem 1rem',
+      fontSize: '0.875rem'
+    }}>
+      <p style={{ color: '#e2e8f0', fontWeight: 600, marginBottom: 4 }}>{name}</p>
+      <p style={{ color: '#00d4ff', fontWeight: 700 }}>${value.toLocaleString()}</p>
+    </div>
+  )
+}
+
+/* leyenda del grafico */
+
+const CustomLegend = ({ payload }) => (
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1.25rem', justifyContent: 'center', marginTop: '1rem' }}>
+    {payload.map((entry, i) => (
+      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#64748b' }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color, display: 'inline-block' }} />
+        {entry.value}
+      </div>
+    ))}
+  </div>
+)
 
 const Dashboard = () => {
   const [datos, setDatos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    cargarDatos()
-  }, [])
+  useEffect(() => { cargarDatos() }, [])
 
   const cargarDatos = async () => {
     try {
       setLoading(true)
       const response = await getDashboard()
       setDatos(response.data)
-    } catch (err) {
-      setError('Error al cargar el dashboard')
+    } catch {
+      setError('Error al cargar el dashboard.')
     } finally {
       setLoading(false)
     }
   }
 
-  if (loading) return <p style={{ padding: '2rem' }}>Cargando dashboard...</p>
-  if (error) return <p style={{ padding: '2rem', color: 'red' }}>{error}</p>
+  /* Suma todos lo totales de ventas  */
+
+  const totalGeneral = datos.reduce((acc, d) => acc + d.totalVentas, 0)
+
+  if (loading) return (
+    <div className="page">
+      <div className="state-box">
+        <div className="spinner" />
+        <p className="state-text">Cargando dashboard...</p>
+      </div>
+    </div>
+  )
+
+  if (error) return (
+    <div className="page">
+      <div className="state-box state-error">
+        <span className="state-icon">⚠️</span>
+        <p className="state-text">{error}</p>
+      </div>
+    </div>
+  )
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-      <h2 style={{ marginBottom: '2rem' }}>Dashboard — Ventas por Producto</h2>
+    <div className="page">
+
+      {/* Header */}
+
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Dashboard</h2>
+          <p className="page-subtitle">Ventas por producto</p>
+        </div>
+        {totalGeneral > 0 && (
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Total General
+            </p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent)' }}>
+              ${totalGeneral.toLocaleString()}
+            </p>
+          </div>
+        )}
+      </div>
 
       {datos.length === 0 ? (
-        <p>No hay datos de ventas disponibles.</p>
+        <div className="state-box">
+          <span className="state-icon">📊</span>
+          <p className="state-text">No hay datos de ventas disponibles.</p>
+        </div>
       ) : (
         <>
-          {/* Gráfica de torta */}
-          <div style={{ backgroundColor: '#1a1a2e', borderRadius: '8px', padding: '2rem', marginBottom: '2rem' }}>
-            <ResponsiveContainer width="100%" height={400}>
+
+          {/* Gráfica */}
+
+          <div className="card" style={{ marginBottom: '1.5rem', padding: '2rem' }}>
+            <ResponsiveContainer width="100%" height={360}>
               <PieChart>
                 <Pie
                   data={datos}
                   dataKey="totalVentas"
                   nameKey="nombreProducto"
                   cx="50%"
-                  cy="50%"
-                  outerRadius={150}
-                  label={({ nombreProducto, porcentaje }) =>
-                    `${nombreProducto}: ${porcentaje}%`
-                  }
+                  cy="48%"
+                  outerRadius={140}
+                  innerRadius={55}
+                  paddingAngle={2}
+                  label={({ porcentaje }) => `${porcentaje}%`}
+                  labelLine={{ stroke: '#1e2d40' }}
                 >
-                  {datos.map((entry, index) => (
+                  {datos.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
+                      stroke="transparent"
                     />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(value) => [`$${value.toLocaleString()}`, 'Total Ventas']}
-                />
-                <Legend />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend content={<CustomLegend />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Tabla de resumen */}
-          <h3 style={{ marginBottom: '1rem' }}>Resumen de Ventas</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#1a1a2e', color: 'white' }}>
-                <th style={thStyle}>Producto</th>
-                <th style={thStyle}>Total Ventas</th>
-                <th style={thStyle}>Porcentaje</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datos.map((item, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #333' }}>
-                  <td style={tdStyle}>
-                    <span style={{
-                      display: 'inline-block',
-                      width: '12px',
-                      height: '12px',
-                      backgroundColor: COLORS[index % COLORS.length],
-                      borderRadius: '50%',
-                      marginRight: '0.5rem'
-                    }} />
-                    {item.nombreProducto}
-                  </td>
-                  <td style={tdStyle}>${item.totalVentas.toLocaleString()}</td>
-                  <td style={tdStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{
-                        height: '8px',
-                        width: `${item.porcentaje}%`,
-                        backgroundColor: COLORS[index % COLORS.length],
-                        borderRadius: '4px',
-                        maxWidth: '200px'
-                      }} />
-                      {item.porcentaje}%
-                    </div>
-                  </td>
+          {/* Tabla resumen */}
+          
+          <p className="section-heading">Resumen de Ventas</p>
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Total Ventas</th>
+                  <th>Participación</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {datos.map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <span className="dot" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span style={{ fontWeight: 500 }}>{item.nombreProducto}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--accent)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                      ${item.totalVentas.toLocaleString()}
+                    </td>
+                    <td>
+                      <div className="progress-row">
+                        <div className="progress-track">
+                          <div
+                            className="progress-fill"
+                            style={{
+                              width: `${item.porcentaje}%`,
+                              backgroundColor: COLORS[index % COLORS.length]
+                            }}
+                          />
+                        </div>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', minWidth: '38px' }}>
+                          {item.porcentaje}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </div>
   )
 }
-
-const thStyle = { padding: '0.75rem 1rem', textAlign: 'left' }
-const tdStyle = { padding: '0.75rem 1rem', color: 'white' }
 
 export default Dashboard

@@ -4,11 +4,16 @@ import { getFacturaById, createFactura, updateFactura } from '../../services/fac
 import { getClientes } from '../../services/clienteService'
 import { getEmisores } from '../../services/emisorService'
 import { getProductos } from '../../services/productoService'
+import '../../App.css'
+
+/* Detectar si va a haber edicion o creacion */
 
 const FormFactura = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = !!id
+
+/* Definir los estados, hay estados externos que vienen de la API y estados del formulario relacionados a lo que se esta contruyendo o editando */
 
   const [clientes, setClientes] = useState([])
   const [emisores, setEmisores] = useState([])
@@ -22,6 +27,8 @@ const FormFactura = () => {
     detalles: []
   })
 
+  /* Solo existen en el formulario de creación, una vez se ha agregado a la factura, este se resetea */
+
   const [nuevoDetalle, setNuevoDetalle] = useState({
     idProducto: '',
     cantidad: 1,
@@ -30,17 +37,15 @@ const FormFactura = () => {
     total: 0
   })
 
-  useEffect(() => {
-    cargarDatos()
-  }, [])
+  useEffect(() => { cargarDatos() }, [])
+
+  /* Cargar los datos necesarios para el formulario. El promise all, lanza 3 peticiones al tiempo */
 
   const cargarDatos = async () => {
     try {
       setLoading(true)
       const [clientesRes, emisoresRes, productosRes] = await Promise.all([
-        getClientes(),
-        getEmisores(),
-        getProductos()
+        getClientes(), getEmisores(), getProductos()
       ])
       setClientes(clientesRes.data)
       setEmisores(emisoresRes.data)
@@ -49,97 +54,62 @@ const FormFactura = () => {
       if (isEditing) {
         const facturaRes = await getFacturaById(id)
         const f = facturaRes.data
-        setFactura({
-          idFactura: f.idFactura,
-          idCliente: f.idCliente,
-          idEmisor: f.idEmisor,
-          detalles: f.detalles || []
-        })
+        setFactura({ idFactura: f.idFactura, idCliente: f.idCliente, idEmisor: f.idEmisor, detalles: f.detalles || [] })
       }
-    } catch (err) {
-      setError('Error al cargar los datos')
+    } catch {
+      setError('Error al cargar los datos.')
     } finally {
       setLoading(false)
     }
   }
 
+/* Permite calcular los precios automaticamente */
+
   const handleProductoChange = (idProducto) => {
     const producto = productos.find(p => p.idProducto === parseInt(idProducto))
     if (producto) {
       const subtotal = nuevoDetalle.cantidad * producto.precioBase
-      setNuevoDetalle({
-        idProducto: producto.idProducto,
-        cantidad: nuevoDetalle.cantidad,
-        precioUnitario: producto.precioBase,
-        subtotal: subtotal,
-        total: subtotal
-      })
+      setNuevoDetalle({ idProducto: producto.idProducto, cantidad: nuevoDetalle.cantidad, precioUnitario: producto.precioBase, subtotal, total: subtotal })
     }
   }
+
+/* Recalcular al cambiar la cantidad, Cada que el usuario modifica la cantidad recalcula el subtotal */
 
   const handleCantidadChange = (cantidad) => {
     const cantidadNum = parseInt(cantidad) || 1
     const subtotal = cantidadNum * nuevoDetalle.precioUnitario
-    setNuevoDetalle({
-      ...nuevoDetalle,
-      cantidad: cantidadNum,
-      subtotal: subtotal,
-      total: subtotal
-    })
+    setNuevoDetalle({ ...nuevoDetalle, cantidad: cantidadNum, subtotal, total: subtotal })
   }
 
+  /* Agregar producto a la factura, Validamos primero si el producto ya esta agregado, sino agrega ese nuevo producto al array */ 
+
   const agregarDetalle = () => {
-    if (!nuevoDetalle.idProducto) {
-        alert('Seleccione un producto')
-        return
-    }
-
-    // ✅ Verificar si el producto ya está en la lista
-    const yaExiste = factura.detalles.some(
-        d => d.idProducto === nuevoDetalle.idProducto
-    )
-    if (yaExiste) {
-        alert('Este producto ya está agregado. Modifica la cantidad en su lugar.')
-        return
-    }
-
+    if (!nuevoDetalle.idProducto) { alert('Seleccione un producto'); return }
+    const yaExiste = factura.detalles.some(d => d.idProducto === nuevoDetalle.idProducto)
+    if (yaExiste) { alert('Este producto ya está agregado. Modifica la cantidad en su lugar.'); return }
     const producto = productos.find(p => p.idProducto === nuevoDetalle.idProducto)
-    const detalleConNombre = {
+    setFactura({
+      ...factura,
+      detalles: [...factura.detalles, {
         ...nuevoDetalle,
         idFactura: id ? parseInt(id) : 0,
         nombreProducto: producto?.nombreProducto || ''
-    }
-    setFactura({
-        ...factura,
-        detalles: [...factura.detalles, detalleConNombre]
+      }]
     })
-    setNuevoDetalle({
-        idProducto: '',
-        cantidad: 1,
-        precioUnitario: 0,
-        subtotal: 0,
-        total: 0
-    })
-}
+    setNuevoDetalle({ idProducto: '', cantidad: 1, precioUnitario: 0, subtotal: 0, total: 0 })
+  }
 
   const eliminarDetalle = (index) => {
-    const nuevosDetalles = factura.detalles.filter((_, i) => i !== index)
-    setFactura({ ...factura, detalles: nuevosDetalles })
+    setFactura({ ...factura, detalles: factura.detalles.filter((_, i) => i !== index) })
   }
 
-  const calcularTotal = () => {
-    return factura.detalles.reduce((acc, d) => acc + d.total, 0)
-  }
+  /* Permite recorrer el array de detalles y calcular el total */
+
+  const calcularTotal = () => factura.detalles.reduce((acc, d) => acc + d.total, 0)
 
   const handleSubmit = async () => {
-    if (!factura.idCliente || !factura.idEmisor) {
-      alert('Seleccione cliente y emisor')
-      return
-    }
-    if (factura.detalles.length === 0) {
-      alert('Agregue al menos un producto')
-      return
-    }
+    if (!factura.idCliente || !factura.idEmisor) { alert('Seleccione cliente y emisor'); return }
+    if (factura.detalles.length === 0) { alert('Agregue al menos un producto'); return }
     try {
       const facturaData = {
         ...factura,
@@ -147,171 +117,175 @@ const FormFactura = () => {
         idEmisor: parseInt(factura.idEmisor),
         totalFactura: calcularTotal()
       }
-      if (isEditing) {
-        await updateFactura(id, facturaData)
-      } else {
-        await createFactura(facturaData)
-      }
+      if (isEditing) { await updateFactura(id, facturaData) }
+      else { await createFactura(facturaData) }
       navigate('/')
-    } catch (err) {
-      setError('Error al guardar la factura')
+    } catch {
+      setError('Error al guardar la factura.')
     }
   }
 
-  if (loading) return <p style={{ padding: '2rem' }}>Cargando...</p>
-  if (error) return <p style={{ padding: '2rem', color: 'red' }}>{error}</p>
+  if (loading) return (
+    <div className="page">
+      <div className="state-box">
+        <div className="spinner" />
+        <p className="state-text">Cargando...</p>
+      </div>
+    </div>
+  )
+
+  if (error) return (
+    <div className="page">
+      <div className="state-box state-error">
+        <p className="state-text">{error}</p>
+      </div>
+    </div>
+  )
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>{isEditing ? 'Editar Factura' : 'Nueva Factura'}</h2>
-        <button
-          onClick={() => navigate('/')}
-          style={btnGrisStyle}
-        >
+    <div className="page">
+      {/* Header */}
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">{isEditing ? 'Editar Factura' : 'Nueva Factura'}</h2>
+          <p className="page-subtitle">{isEditing ? `Modificando factura #${id}` : 'Complete los datos para crear una nueva factura'}</p>
+        </div>
+        <button className="btn btn-ghost" onClick={() => navigate('/')}>
           ← Volver
         </button>
       </div>
 
-      {/* Dropdowns Cliente y Emisor */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <label style={labelStyle}>Cliente</label>
-          <select
-            value={factura.idCliente}
-            onChange={(e) => setFactura({ ...factura, idCliente: e.target.value })}
-            style={selectStyle}
-          >
-            <option value="">Seleccione un cliente</option>
-            {clientes.map(c => (
-              <option key={c.idCliente} value={c.idCliente}>
-                {c.nombres} {c.apellidos} - {c.identificacion}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label style={labelStyle}>Emisor</label>
-          <select
-            value={factura.idEmisor}
-            onChange={(e) => setFactura({ ...factura, idEmisor: e.target.value })}
-            style={selectStyle}
-          >
-            <option value="">Seleccione un emisor</option>
-            {emisores.map(e => (
-              <option key={e.idEmisor} value={e.idEmisor}>
-                {e.razonSocial} - {e.identificacion}
-              </option>
-            ))}
-          </select>
+      {/* Cliente + Emisor */}
+
+      <div className="form-section">
+        <p className="form-section-title">Información General</p>
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label">Cliente</label>
+            <select
+              className="form-select"
+              value={factura.idCliente}
+              onChange={(e) => setFactura({ ...factura, idCliente: e.target.value })}
+            >
+              <option value="">— Seleccione un cliente —</option>
+              {clientes.map(c => (
+                <option key={c.idCliente} value={c.idCliente}>
+                  {c.nombres} {c.apellidos} · {c.identificacion}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Emisor</label>
+            <select
+              className="form-select"
+              value={factura.idEmisor}
+              onChange={(e) => setFactura({ ...factura, idEmisor: e.target.value })}
+            >
+              <option value="">— Seleccione un emisor —</option>
+              {emisores.map(e => (
+                <option key={e.idEmisor} value={e.idEmisor}>
+                  {e.razonSocial} · {e.identificacion}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Agregar producto */}
-      <h3 style={{ marginBottom: '1rem' }}>Agregar Producto</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '1rem', marginBottom: '1rem', alignItems: 'end' }}>
-        <div>
-          <label style={labelStyle}>Producto</label>
-          <select
-            value={nuevoDetalle.idProducto}
-            onChange={(e) => handleProductoChange(e.target.value)}
-            style={selectStyle}
-          >
-            <option value="">Seleccione un producto</option>
-            {productos.map(p => (
-              <option key={p.idProducto} value={p.idProducto}>
-                {p.nombreProducto} - ${p.precioBase.toLocaleString()}
-              </option>
-            ))}
-          </select>
+
+      <div className="form-section">
+        <p className="form-section-title">Agregar Producto</p>
+        <div className="form-grid-4">
+          <div className="form-group">
+            <label className="form-label">Producto</label>
+            <select
+              className="form-select"
+              value={nuevoDetalle.idProducto}
+              onChange={(e) => handleProductoChange(e.target.value)}
+            >
+              <option value="">— Seleccione un producto —</option>
+              {productos.map(p => (
+                <option key={p.idProducto} value={p.idProducto}>
+                  {p.nombreProducto} · ${p.precioBase.toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Cantidad</label>
+            <input
+              type="number"
+              min="1"
+              className="form-input"
+              value={nuevoDetalle.cantidad}
+              onChange={(e) => handleCantidadChange(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Subtotal</label>
+            <input
+              type="text"
+              className="form-input"
+              value={nuevoDetalle.subtotal > 0 ? `$${nuevoDetalle.subtotal.toLocaleString()}` : '—'}
+              disabled
+            />
+          </div>
+          <button className="btn btn-primary" onClick={agregarDetalle}>
+            + Agregar
+          </button>
         </div>
-        <div>
-          <label style={labelStyle}>Cantidad</label>
-          <input
-            type="number"
-            min="1"
-            value={nuevoDetalle.cantidad}
-            onChange={(e) => handleCantidadChange(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Subtotal</label>
-          <input
-            type="text"
-            value={`$${nuevoDetalle.subtotal.toLocaleString()}`}
-            disabled
-            style={{ ...inputStyle, backgroundColor: '#333' }}
-          />
-        </div>
-        <button
-          onClick={agregarDetalle}
-          style={btnAzulStyle}
-        >
-          + Agregar
-        </button>
       </div>
 
       {/* Tabla de detalles */}
+
       {factura.detalles.length > 0 && (
-        <>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#1a1a2e', color: 'white' }}>
-                <th style={thStyle}>Producto</th>
-                <th style={thStyle}>Cantidad</th>
-                <th style={thStyle}>Precio Unit.</th>
-                <th style={thStyle}>Total</th>
-                <th style={thStyle}>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {factura.detalles.map((detalle, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tdStyle}>{detalle.nombreProducto}</td>
-                  <td style={tdStyle}>{detalle.cantidad}</td>
-                  <td style={tdStyle}>${detalle.precioUnitario.toLocaleString()}</td>
-                  <td style={tdStyle}>${detalle.total.toLocaleString()}</td>
-                  <td style={tdStyle}>
-                    <button
-                      onClick={() => eliminarDetalle(index)}
-                      style={btnRojoStyle}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p className="section-heading">Productos agregados</p>
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Total</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr style={{ backgroundColor: '#1a1a2e', color: 'white' }}>
-                <td colSpan="3" style={{ ...tdStyle, textAlign: 'right', fontWeight: 'bold' }}>Total:</td>
-                <td colSpan="2" style={{ ...tdStyle, fontWeight: 'bold' }}>${calcularTotal().toLocaleString()}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {factura.detalles.map((detalle, index) => (
+                  <tr key={index}>
+                    <td style={{ fontWeight: 500 }}>{detalle.nombreProducto}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{detalle.cantidad}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>${detalle.precioUnitario.toLocaleString()}</td>
+                    <td style={{ color: 'var(--accent)', fontWeight: 700 }}>${detalle.total.toLocaleString()}</td>
+                    <td>
+                      <button className="btn btn-sm btn-danger" onClick={() => eliminarDetalle(index)}>
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="total-highlight">
+            <span className="total-highlight-label">Total Factura</span>
+            <span className="total-highlight-value">${calcularTotal().toLocaleString()}</span>
+          </div>
+        </div>
       )}
 
-      {/* Botón guardar */}
-      <button
-        onClick={handleSubmit}
-        style={btnVerdeStyle}
-      >
-        {isEditing ? 'Actualizar Factura' : 'Crear Factura'}
+      {/* Guardar */}
+
+      <button className="btn btn-success btn-lg" onClick={handleSubmit}>
+        {isEditing ? ' Actualizar Factura' : ' Crear Factura'}
       </button>
     </div>
   )
 }
-
-const labelStyle = { display: 'block', marginBottom: '0.3rem', color: '#aaa', fontSize: '0.9rem' }
-const selectStyle = { width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #555', backgroundColor: '#222', color: 'white' }
-const inputStyle = { width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #555', backgroundColor: '#222', color: 'white' }
-const thStyle = { padding: '0.75rem 1rem', textAlign: 'left' }
-const tdStyle = { padding: '0.75rem 1rem' }
-const btnAzulStyle = { backgroundColor: '#00d4ff', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', height: '36px' }
-const btnRojoStyle = { backgroundColor: '#ff4444', border: 'none', padding: '0.3rem 0.7rem', borderRadius: '4px', cursor: 'pointer', color: 'white' }
-const btnVerdeStyle = { backgroundColor: '#00c853', border: 'none', padding: '0.7rem 2rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', marginTop: '1rem' }
-const btnGrisStyle = { backgroundColor: '#555', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', color: 'white' }
 
 export default FormFactura
