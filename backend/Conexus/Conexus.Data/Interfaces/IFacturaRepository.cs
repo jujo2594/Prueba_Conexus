@@ -13,9 +13,8 @@ namespace Conexus.Data.Interfaces
 
         Task<IEnumerable<Factura>> GetAllFacturasCompletasAsync();
 
-        Task<IEnumerable<Factura>> GetByClienteAsync(int idCliente);
-
-        Task<IEnumerable<Factura>> GetByEmisorAsync(int idEmisor);
+        Task<IEnumerable<Factura>> GetByClienteAsync(string identificacion);
+        Task<IEnumerable<Factura>> GetByEmisorAsync(string identificacion);
 
         Task<IEnumerable<DetalleFactura>> GetDetallesForDashboardAsync();
 

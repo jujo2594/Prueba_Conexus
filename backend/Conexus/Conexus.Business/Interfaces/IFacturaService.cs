@@ -11,8 +11,8 @@ namespace Conexus.Business.Interfaces
     {
         Task<IEnumerable<FacturaDto>> GetAllAsync();
         Task<FacturaDto?> GetByIdAsync(int id);
-        Task<IEnumerable<FacturaDto>> GetByClienteAsync(int idCliente);
-        Task<IEnumerable<FacturaDto>> GetByEmisorAsync(int idEmisor);
+        Task<IEnumerable<FacturaDto>> GetByClienteAsync(string identificacion);
+        Task<IEnumerable<FacturaDto>> GetByEmisorAsync(string identificacion);
         Task<FacturaDto> CreateAsync(FacturaDto facturaDto);
         Task<FacturaDto> UpdateAsync(FacturaDto facturaDto);
         Task<bool> DeleteAsync(int id);

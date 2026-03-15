@@ -30,17 +30,17 @@ namespace Conexus.Api.Controllers
             return Ok(factura);
         }
 
-        [HttpGet("cliente/{idCliente}")]
-        public async Task<IActionResult> GetByCliente(int idCliente)
+        [HttpGet("cliente/{identificacion}")]
+        public async Task<IActionResult> GetByCliente(string identificacion)
         {
-            var facturas = await _facturaService.GetByClienteAsync(idCliente);
+            var facturas = await _facturaService.GetByClienteAsync(identificacion);
             return Ok(facturas);
         }
 
-        [HttpGet("emisor/{idEmisor}")]
-        public async Task<IActionResult> GetByEmisor(int idEmisor)
+        [HttpGet("emisor/{identificacion}")]
+        public async Task<IActionResult> GetByEmisor(string identificacion)
         {
-            var facturas = await _facturaService.GetByEmisorAsync(idEmisor);
+            var facturas = await _facturaService.GetByEmisorAsync(identificacion);
             return Ok(facturas);
         }
 

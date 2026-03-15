@@ -34,15 +34,15 @@ namespace Conexus.Business.Services
             return factura == null ? null : _mapper.Map<FacturaDto>(factura);
         }
 
-        public async Task<IEnumerable<FacturaDto>> GetByClienteAsync(int idCliente)
+        public async Task<IEnumerable<FacturaDto>> GetByClienteAsync(string identificacion)
         {
-            var facturas = await _facturaRepository.GetByClienteAsync(idCliente);
+            var facturas = await _facturaRepository.GetByClienteAsync(identificacion);
             return _mapper.Map<IEnumerable<FacturaDto>>(facturas);
         }
 
-        public async Task<IEnumerable<FacturaDto>> GetByEmisorAsync(int idEmisor)
+        public async Task<IEnumerable<FacturaDto>> GetByEmisorAsync(string identificacion)
         {
-            var facturas = await _facturaRepository.GetByEmisorAsync(idEmisor);
+            var facturas = await _facturaRepository.GetByEmisorAsync(identificacion);
             return _mapper.Map<IEnumerable<FacturaDto>>(facturas);
         }
 

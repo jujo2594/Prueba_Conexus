@@ -36,25 +36,25 @@ namespace Conexus.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Factura>> GetByClienteAsync(int idCliente)
+        public async Task<IEnumerable<Factura>> GetByClienteAsync(string identificacion)
         {
             return await _context.Facturas
                 .Include(f => f.IdClienteNavigation)
                 .Include(f => f.IdEmisorNavigation)
                 .Include(f => f.DetalleFacturas)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .Where(f => f.IdCliente == idCliente)
+                .Where(f => f.IdClienteNavigation.Identificacion == identificacion)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Factura>> GetByEmisorAsync(int idEmisor)
+        public async Task<IEnumerable<Factura>> GetByEmisorAsync(string identificacion)
         {
             return await _context.Facturas
                 .Include(f => f.IdClienteNavigation)
                 .Include(f => f.IdEmisorNavigation)
                 .Include(f => f.DetalleFacturas)
                     .ThenInclude(d => d.IdProductoNavigation)
-                .Where(f => f.IdEmisor == idEmisor)
+                .Where(f => f.IdEmisorNavigation.Identificacion == identificacion)
                 .ToListAsync();
         }
 
