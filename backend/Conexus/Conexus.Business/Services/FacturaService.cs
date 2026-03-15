@@ -48,24 +48,85 @@ namespace Conexus.Business.Services
 
         public async Task<FacturaDto> CreateAsync(FacturaDto facturaDto)
         {
-            var factura = _mapper.Map<Factura>(facturaDto);
-            factura.FechaFactura = DateTime.Now;
-            //Permite calcular el total de cada factura 
-            factura.TotalFactura = facturaDto.Detalles.Sum(d => d.Total);
+
+            var factura = new Factura
+            {
+                IdCliente = facturaDto.IdCliente,
+                IdEmisor = facturaDto.IdEmisor,
+                FechaFactura = DateTime.Now,
+                TotalFactura = facturaDto.Detalles.Sum(d => d.Total)
+            };
+
             var created = await _facturaRepository.CreateAsync(factura);
-            return _mapper.Map<FacturaDto>(created);
+
+            foreach (var detalleDto in facturaDto.Detalles)
+            {
+                var detalle = new DetalleFactura
+                {
+                    IdFactura = created.IdFactura,
+                    IdProducto = detalleDto.IdProducto,
+                    Cantidad = detalleDto.Cantidad,
+                    PrecioUnitario = detalleDto.PrecioUnitario,
+                    Subtotal = detalleDto.Cantidad * detalleDto.PrecioUnitario,
+                    Total = detalleDto.Cantidad * detalleDto.PrecioUnitario
+                };
+                await _facturaRepository.AddDetalleAsync(detalle);
+            }
+
+            var facturaCompleta = await _facturaRepository.GetFacturaCompletaAsync(created.IdFactura);
+            return _mapper.Map<FacturaDto>(facturaCompleta);
         }
 
         public async Task<FacturaDto> UpdateAsync(FacturaDto facturaDto)
         {
-            var factura = _mapper.Map<Factura>(facturaDto);
-            factura.TotalFactura = facturaDto.Detalles.Sum(d => d.Total);
-            var updated = await _facturaRepository.UpdateAsync(factura);
-            return _mapper.Map<FacturaDto>(updated);
+            // 1. Obtener la factura actual con sus detalles
+            var facturaActual = await _facturaRepository.GetFacturaCompletaAsync(facturaDto.IdFactura);
+            if (facturaActual == null) throw new Exception("Factura no encontrada");
+
+            // 2. Eliminar todos los detalles existentes
+            foreach (var detalle in facturaActual.DetalleFacturas.ToList())
+            {
+                await _facturaRepository.DeleteDetalleAsync(detalle.IdDetalleFactura);
+            }
+
+            // 3. Actualizar datos de la factura
+            facturaActual.IdCliente = facturaDto.IdCliente;
+            facturaActual.IdEmisor = facturaDto.IdEmisor;
+            facturaActual.TotalFactura = facturaDto.Detalles.Sum(d => d.Total);
+
+            await _facturaRepository.UpdateAsync(facturaActual);
+
+            // 4. Agregar los nuevos detalles
+            foreach (var detalleDto in facturaDto.Detalles)
+            {
+                var detalle = new DetalleFactura
+                {
+                    IdFactura = facturaDto.IdFactura,
+                    IdProducto = detalleDto.IdProducto,
+                    Cantidad = detalleDto.Cantidad,
+                    PrecioUnitario = detalleDto.PrecioUnitario,
+                    Subtotal = detalleDto.Cantidad * detalleDto.PrecioUnitario,
+                    Total = detalleDto.Cantidad * detalleDto.PrecioUnitario
+                };
+                await _facturaRepository.AddDetalleAsync(detalle);
+            }
+
+            // 5. Retornar la factura completa actualizada
+            var facturaCompleta = await _facturaRepository.GetFacturaCompletaAsync(facturaDto.IdFactura);
+            return _mapper.Map<FacturaDto>(facturaCompleta);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
+
+            var factura = await _facturaRepository.GetFacturaCompletaAsync(id);
+            if (factura == null) return false;
+
+            foreach (var detalle in factura.DetalleFacturas.ToList())
+            {
+                await _facturaRepository.DeleteDetalleAsync(detalle.IdDetalleFactura);
+            }
+
             return await _facturaRepository.DeleteAsync(id);
         }
 
