@@ -1,28 +1,9 @@
 import { useState, useEffect } from 'react'
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
 import { getDashboard } from '../../services/facturaService'
 import '../../App.css'
 
 const COLORS = ['#00d4ff', '#10b981', '#f59e0b', '#ef4444', '#a855f7', '#f97316']
-
-/* Tooltip personalizado */
-
-const CustomTooltip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null
-  const { name, value } = payload[0]
-  return (
-    <div style={{
-      background: '#111827',
-      border: '1px solid #1e2d40',
-      borderRadius: 8,
-      padding: '0.75rem 1rem',
-      fontSize: '0.875rem'
-    }}>
-      <p style={{ color: '#e2e8f0', fontWeight: 600, marginBottom: 4 }}>{name}</p>
-      <p style={{ color: '#00d4ff', fontWeight: 700 }}>${value.toLocaleString()}</p>
-    </div>
-  )
-}
 
 /* leyenda del grafico */
 
@@ -72,7 +53,6 @@ const Dashboard = () => {
   if (error) return (
     <div className="page">
       <div className="state-box state-error">
-        <span className="state-icon">⚠️</span>
         <p className="state-text">{error}</p>
       </div>
     </div>
@@ -81,7 +61,7 @@ const Dashboard = () => {
   return (
     <div className="page">
 
-      {/* Header */}
+      {/* Encabezado */}
 
       <div className="page-header">
         <div>
@@ -102,7 +82,6 @@ const Dashboard = () => {
 
       {datos.length === 0 ? (
         <div className="state-box">
-          <span className="state-icon">📊</span>
           <p className="state-text">No hay datos de ventas disponibles.</p>
         </div>
       ) : (
@@ -133,7 +112,6 @@ const Dashboard = () => {
                     />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip />} />
                 <Legend content={<CustomLegend />} />
               </PieChart>
             </ResponsiveContainer>

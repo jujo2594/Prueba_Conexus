@@ -81,7 +81,6 @@ const FormProducto = () => {
 
   return (
     <div className="page">
-      {/* Header */}
       <div className="page-header">
         <div>
           <h2 className="page-title">{isEditing ? 'Editar Producto' : 'Nuevo Producto'}</h2>
@@ -94,7 +93,6 @@ const FormProducto = () => {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div style={{
           background: 'var(--red-dim)',
@@ -105,11 +103,9 @@ const FormProducto = () => {
           marginBottom: '1.5rem',
           fontSize: '0.9rem'
         }}>
-          ⚠️ {error}
         </div>
       )}
 
-      {/* Formulario */}
       <div className="form-section">
         <p className="form-section-title">Información del Producto</p>
         <div className="form-group" style={{ marginBottom: '1rem' }}>
@@ -155,7 +151,6 @@ const FormProducto = () => {
         </div>
       </div>
 
-      {/* Preview del precio */}
       {producto.precioBase > 0 && (
         <div style={{
           background: 'var(--accent-dim)',
@@ -181,7 +176,7 @@ const FormProducto = () => {
           onClick={handleSubmit}
           disabled={saving}
         >
-          {saving ? 'Guardando...' : isEditing ? '✓ Actualizar Producto' : '✓ Crear Producto'}
+          {saving ? 'Guardando...' : isEditing ? 'Actualizar Producto' : 'Crear Producto'}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/productos')}>
           Cancelar

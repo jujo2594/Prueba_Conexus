@@ -1,48 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Backgrounds de la App */
-  --bg-base:    #080c14;
-  --bg-surface: #0d1117;
-  --bg-card:    #111827;
-  --bg-card-hover: #16213a;
-  --bg-input:   #0d1117;
+  /* Background Aplicacion */
+  --bg-base:        #EFF1FA;
+  --bg-surface:     #E8EAF6;
+  --bg-card:        #FFFFFF;
+  --bg-card-hover:  #F5F6FD;
+  --bg-input:       #FFFFFF;
 
-  /*  Colores para los bordes */
-  --border:       #1e2d40;
-  --border-light: #243650;
+  /* Delineados */
+  --border:       #DDE0EF;
+  --border-light: #C8CCE3;
 
-  /* Colores de las fuentes */
-  --text-primary:   #e2e8f0;
-  --text-secondary: #64748b;
-  --text-muted:     #3d5068;
+  /* Colores de fuentes */
+  --text-primary:   #0F172A;
+  --text-secondary: #64748B;
+  --text-muted:     #94A3B8;
 
-  /* Colores de acento o destacados */
-  --accent:        #00d4ff;
-  --accent-dim:    rgba(0, 212, 255, 0.08);
-  --accent-border: rgba(0, 212, 255, 0.25);
-  --accent-glow:   rgba(0, 212, 255, 0.15);
+  /* Acentos */
+  --accent:        #4F6BF4;
+  --accent-dim:    rgba(79, 107, 244, 0.08);
+  --accent-border: rgba(79, 107, 244, 0.25);
+  --accent-glow:   rgba(79, 107, 244, 0.15);
 
-  /* Advertencias */
-  --green:      #10b981;
-  --green-dim:  rgba(16, 185, 129, 0.1);
-  --orange:     #f59e0b;
-  --orange-dim: rgba(245, 158, 11, 0.1);
-  --red:        #ef4444;
-  --red-dim:    rgba(239, 68, 68, 0.08);
+  /* Fuentes que resaltan, eliminar, editar, agregar, guardar */
+  --green:      #059669;
+  --green-dim:  rgba(5, 150, 105, 0.08);
+  --orange:     #D97706;
+  --orange-dim: rgba(217, 119, 6, 0.08);
+  --red:        #DC2626;
+  --red-dim:    rgba(220, 38, 38, 0.06);
 
-  /* Redondeo */
+  /* botones  */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
 
-  /* Sombras y gradientes en la app */
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 50px rgba(0, 0, 0, 0.6);
+  /* Sombras */
+  --shadow-sm: 0 1px 4px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 50px rgba(15, 23, 42, 0.12);
 
-  /* Fuente y sus caracteristicas */
   font-family: 'Outfit', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
@@ -52,12 +51,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/*  */
 *, *::before, *::after {
   box-sizing: border-box;
 }
-
-
 
 body {
   margin: 0;
@@ -65,8 +61,8 @@ body {
   color: var(--text-primary);
   /* Subtle grid pattern */
   background-image:
-    linear-gradient(rgba(0, 212, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.015) 1px, transparent 1px);
+    linear-gradient(rgba(79, 107, 244, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 107, 244, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
   background-attachment: fixed;
 }
@@ -75,7 +71,6 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* Override Vite default */
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -93,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
 p { margin: 0; }
 
 a { color: var(--accent); text-decoration: none; }
-a:hover { color: #33ddff; }
+a:hover { color: #3B52D4; }
 
 table { border-spacing: 0; }
 

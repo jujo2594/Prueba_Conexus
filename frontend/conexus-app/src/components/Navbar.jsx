@@ -16,29 +16,31 @@ const Navbar = () => {
         <span style={logoSubStyle}>IT</span>
       </div>
 
+      {/* Links */}
       <div style={linksStyle}>
         <NavLink to="/"          label="Facturas"   active={isActive('/')} />
         <NavLink to="/clientes"  label="Clientes"   active={isActive('/clientes')} />
         <NavLink to="/productos" label="Productos"  active={isActive('/productos')} />
-        <NavLink to="/dashboard" label="Dashboard" active={isActive('/dashboard')} />
+        <NavLink to="/dashboard" label="Dashboard"  active={isActive('/dashboard')} />
       </div>
 
     </nav>
   )
 }
 
-const NavLink = ({ to, label, active }) => (
+const NavLink = ({ to, label, icon, active }) => (
   <Link to={to} style={active ? activeLinkStyle : linkStyle}>
-    <span style={{ fontSize: '0.85rem', opacity: 0.7 }}></span>
+    <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{icon}</span>
     {label}
     {active && <span style={activeDotStyle} />}
   </Link>
 )
 
+/* Estilos */
 const navStyle = {
-  backgroundColor: 'rgba(13, 17, 23, 0.95)',
+  backgroundColor: 'rgba(255, 255, 255, 0.92)',
   backdropFilter: 'blur(12px)',
-  borderBottom: '1px solid #1e2d40',
+  borderBottom: '1px solid #DDE0EF',
   padding: '0 2.5rem',
   display: 'flex',
   alignItems: 'center',
@@ -47,6 +49,7 @@ const navStyle = {
   position: 'sticky',
   top: 0,
   zIndex: 100,
+  boxShadow: '0 1px 8px rgba(15, 23, 42, 0.06)',
 }
 
 const logoContainerStyle = {
@@ -61,19 +64,19 @@ const logoDotStyle = {
   width: '8px',
   height: '8px',
   borderRadius: '50%',
-  backgroundColor: '#00d4ff',
-  boxShadow: '0 0 8px rgba(0, 212, 255, 0.6)',
+  backgroundColor: '#4F6BF4',
+  boxShadow: '0 0 8px rgba(79, 107, 244, 0.5)',
 }
 
 const logoTextStyle = {
-  color: '#e2e8f0',
+  color: '#0F172A',
   fontWeight: '700',
   fontSize: '1rem',
   letterSpacing: '-0.02em',
 }
 
 const logoSubStyle = {
-  color: '#00d4ff',
+  color: '#4F6BF4',
   fontWeight: '700',
   fontSize: '1rem',
 }
@@ -89,7 +92,7 @@ const linkStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '0.4rem',
-  color: '#64748b',
+  color: '#64748B',
   textDecoration: 'none',
   fontSize: '0.875rem',
   fontWeight: '500',
@@ -101,8 +104,8 @@ const linkStyle = {
 
 const activeLinkStyle = {
   ...linkStyle,
-  color: '#00d4ff',
-  background: 'rgba(0, 212, 255, 0.08)',
+  color: '#4F6BF4',
+  background: 'rgba(79, 107, 244, 0.08)',
 }
 
 const activeDotStyle = {
@@ -113,20 +116,22 @@ const activeDotStyle = {
   width: '16px',
   height: '2px',
   borderRadius: '1px',
-  backgroundColor: '#00d4ff',
+  backgroundColor: '#4F6BF4',
 }
 
 const quickBtnStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   padding: '0.35rem 0.9rem',
-  background: '#00d4ff',
-  color: '#000',
+  background: '#4F6BF4',
+  color: '#FFFFFF',
   fontWeight: '600',
   fontSize: '0.82rem',
   borderRadius: '6px',
   textDecoration: 'none',
   whiteSpace: 'nowrap',
+  boxShadow: '0 2px 8px rgba(79, 107, 244, 0.3)',
+  transition: 'background 0.15s',
 }
 
 export default Navbar

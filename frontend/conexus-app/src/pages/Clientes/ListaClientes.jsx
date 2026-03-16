@@ -47,7 +47,6 @@ const ListaClientes = () => {
   if (error) return (
     <div className="page-wide">
       <div className="state-box state-error">
-        <span className="state-icon">⚠️</span>
         <p className="state-text">{error}</p>
       </div>
     </div>
@@ -70,7 +69,6 @@ const ListaClientes = () => {
 
       {clientes.length === 0 ? (
         <div className="state-box">
-          <span className="state-icon">👤</span>
           <p className="state-text">No hay clientes registrados aún.</p>
           <button className="btn btn-primary" onClick={() => navigate('/clientes/nuevo')}>
             Crear primer cliente

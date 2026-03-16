@@ -75,7 +75,6 @@ const FormCliente = () => {
 
   return (
     <div className="page">
-      {/* Header */}
       <div className="page-header">
         <div>
           <h2 className="page-title">{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
@@ -88,7 +87,6 @@ const FormCliente = () => {
         </button>
       </div>
 
-      {/* Error */}
       {error && (
         <div style={{
           background: 'var(--red-dim)',
@@ -99,11 +97,9 @@ const FormCliente = () => {
           marginBottom: '1.5rem',
           fontSize: '0.9rem'
         }}>
-          ⚠️ {error}
         </div>
       )}
 
-      {/* Formulario */}
       <div className="form-section">
         <p className="form-section-title">Información del Cliente</p>
         <div className="form-grid-2" style={{ marginBottom: '1rem' }}>
@@ -144,14 +140,13 @@ const FormCliente = () => {
         </div>
       </div>
 
-      {/* Botones */}
       <div className="btn-group">
         <button
           className="btn btn-success btn-lg"
           onClick={handleSubmit}
           disabled={saving}
         >
-          {saving ? 'Guardando...' : isEditing ? '✓ Actualizar Cliente' : '✓ Crear Cliente'}
+          {saving ? 'Guardando...' : isEditing ? ' Actualizar Cliente' : ' Crear Cliente'}
         </button>
         <button className="btn btn-ghost" onClick={() => navigate('/clientes')}>
           Cancelar
